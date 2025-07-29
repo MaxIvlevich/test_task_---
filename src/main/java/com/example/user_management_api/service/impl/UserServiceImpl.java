@@ -1,5 +1,6 @@
 package com.example.user_management_api.service.impl;
 
+import com.example.user_management_api.dto.ChangePasswordRequestDto;
 import com.example.user_management_api.dto.CreateUserRequestDto;
 import com.example.user_management_api.dto.UpdateUserRequestDto;
 import com.example.user_management_api.dto.UserResponseDto;
@@ -10,6 +11,9 @@ import com.example.user_management_api.model.enums.Role;
 import com.example.user_management_api.repository.UserRepository;
 import com.example.user_management_api.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,13 +51,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<UserResponseDto> getAllUsers() {
-        List<User> users = userRepository.findAll();
-        List<UserResponseDto> userDtos = new ArrayList<>();
-        for (User user : users) {
-            userDtos.add(userMapper.toDto(user));
-        }
-        return userDtos;
+    public Page<UserResponseDto> getAllUsers(Pageable pageable) {
+        Page<User> userPage = userRepository.findAll(pageable);
+        return userPage.map(userMapper::toDto);
     }
 
     @Override
@@ -74,5 +74,18 @@ public class UserServiceImpl implements UserService {
             throw new UserNotFoundException("User not found with id: " + id);
         }
         userRepository.deleteById(id);
+    }
+
+    @Override
+    @Transactional
+    public void changePassword(UUID id, ChangePasswordRequestDto requestDto) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException("User not found with id: " + id));
+
+        if (!passwordEncoder.matches(requestDto.oldPassword(), user.getPassword())) {
+            throw new BadCredentialsException("Invalid old password");
+        }
+        user.setPassword(passwordEncoder.encode(requestDto.newPassword()));
+        userRepository.save(user);
     }
 }

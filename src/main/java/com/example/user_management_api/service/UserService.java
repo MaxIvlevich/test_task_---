@@ -1,8 +1,11 @@
 package com.example.user_management_api.service;
 
+import com.example.user_management_api.dto.ChangePasswordRequestDto;
 import com.example.user_management_api.dto.CreateUserRequestDto;
 import com.example.user_management_api.dto.UpdateUserRequestDto;
 import com.example.user_management_api.dto.UserResponseDto;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.UUID;
@@ -28,9 +31,9 @@ public interface UserService {
 
     /**
      * Возвращает список всех пользователей.
-     * @return Список DTO с данными всех пользователей.
+     * @return траница (Page) с DTO пользователей и информацией о пагинации.
      */
-    List<UserResponseDto> getAllUsers();
+    Page<UserResponseDto> getAllUsers(Pageable pageable);
     /**
      * Обновляет существующего пользователя.
      * @param id ID пользователя для обновления.
@@ -44,4 +47,11 @@ public interface UserService {
      * @param id UUID пользователя для удаления.
      */
     void deleteUser(UUID id);
+
+    /**
+     * Изменяет пароль пользователя.
+     * @param id ID пользователя, которому меняем пароль.
+     * @param requestDto DTO с старым и новым паролями.
+     */
+    void changePassword(UUID id, ChangePasswordRequestDto requestDto);
 }
