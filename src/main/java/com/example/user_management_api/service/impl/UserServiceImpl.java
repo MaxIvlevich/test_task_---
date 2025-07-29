@@ -2,11 +2,14 @@ package com.example.user_management_api.service.impl;
 
 import com.example.user_management_api.dto.ChangePasswordRequestDto;
 import com.example.user_management_api.dto.CreateUserRequestDto;
-import com.example.user_management_api.dto.UpdateUserRequestDto;
+import com.example.user_management_api.dto.UpdateUserDataRequestDto;
+import com.example.user_management_api.dto.UserContactInfoResponseDto;
+import com.example.user_management_api.dto.UserDataResponseDto;
 import com.example.user_management_api.dto.UserResponseDto;
 import com.example.user_management_api.exception.UserNotFoundException;
 import com.example.user_management_api.mapper.UserMapper;
 import com.example.user_management_api.model.User;
+import com.example.user_management_api.model.UserData;
 import com.example.user_management_api.model.enums.Role;
 import com.example.user_management_api.repository.UserRepository;
 import com.example.user_management_api.service.UserService;
@@ -18,8 +21,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -33,12 +34,14 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserResponseDto createUser(CreateUserRequestDto requestDto) {
-        User user = userMapper.toEntity(requestDto);
-
+        User user = userMapper.toUserEntity(requestDto);
+        UserData userData = userMapper.toUserDataEntity(requestDto);
         user.setPassword(passwordEncoder.encode(requestDto.password()));
         user.setRoles(Set.of(Role.ROLE_USER));
+        user.setUserData(userData);
+        userData.setUser(user);
         User savedUser = userRepository.save(user);
-        return userMapper.toDto(savedUser);
+        return userMapper.toUserResponseDto(savedUser);
     }
 
     @Override
@@ -46,25 +49,27 @@ public class UserServiceImpl implements UserService {
     public UserResponseDto getUserById(UUID id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException("User not found with id: " + id));
-        return userMapper.toDto(user);
+        return userMapper.toUserResponseDto(user);
     }
 
     @Override
     @Transactional(readOnly = true)
     public Page<UserResponseDto> getAllUsers(Pageable pageable) {
-        Page<User> userPage = userRepository.findAll(pageable);
-        return userPage.map(userMapper::toDto);
+        Page<User> userPage = userRepository.findAllWithData(pageable);
+        return userPage.map(userMapper::toUserResponseDto);
     }
 
     @Override
     @Transactional
-    public UserResponseDto updateUser(UUID id, UpdateUserRequestDto requestDto) {
-        User userToUpdate = userRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException("User not found with id: " + id));
-        // Используем маппер для обновления сущности
-        userMapper.updateUserFromDto(requestDto, userToUpdate);
-        User updatedUser = userRepository.save(userToUpdate);
-        return userMapper.toDto(updatedUser);
+    public UserDataResponseDto  updateUser(UUID userId, UpdateUserDataRequestDto requestDto) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("User not found with id: " + userId));
+        UserData userDataToUpdate = user.getUserData();
+        if (userDataToUpdate == null) {
+            throw new IllegalStateException("User with id " + userId + " does not have associated user data.");
+        }
+        userMapper.updateUserDataFromDto(requestDto, userDataToUpdate);
+        return userMapper.toUserDataDto(userDataToUpdate);
     }
 
     @Override
@@ -87,5 +92,19 @@ public class UserServiceImpl implements UserService {
         }
         user.setPassword(passwordEncoder.encode(requestDto.newPassword()));
         userRepository.save(user);
+    }
+
+    @Override
+    public UserContactInfoResponseDto getUserContactInfo(UUID id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException("User not found with id: " + id));
+        return userMapper.toUserContactInfoDto(user);
+    }
+
+    @Override
+    public UserDataResponseDto getUserData(UUID id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException("User not found with id: " + id));
+        return userMapper.toUserDataDto(user.getUserData());
     }
 }

@@ -2,7 +2,9 @@ package com.example.user_management_api.controller;
 
 import com.example.user_management_api.dto.ChangePasswordRequestDto;
 import com.example.user_management_api.dto.CreateUserRequestDto;
-import com.example.user_management_api.dto.UpdateUserRequestDto;
+import com.example.user_management_api.dto.UpdateUserDataRequestDto;
+import com.example.user_management_api.dto.UserContactInfoResponseDto;
+import com.example.user_management_api.dto.UserDataResponseDto;
 import com.example.user_management_api.dto.UserResponseDto;
 import com.example.user_management_api.service.UserService;
 import jakarta.validation.Valid;
@@ -21,7 +23,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -30,35 +31,31 @@ import java.util.UUID;
 public class UserController {
     private final UserService userService;
 
-    // CREATE
     @PostMapping
     public ResponseEntity<UserResponseDto> createUser(@Valid @RequestBody CreateUserRequestDto requestDto) {
         UserResponseDto createdUser = userService.createUser(requestDto);
         return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
     }
 
-    // READ (by ID)
     @GetMapping("/{id}")
     public ResponseEntity<UserResponseDto> getUserById(@PathVariable UUID id) {
         UserResponseDto user = userService.getUserById(id);
         return ResponseEntity.ok(user);
     }
 
-    // READ (all with pagination)
     @GetMapping
     public ResponseEntity<Page<UserResponseDto>> getAllUsers(Pageable pageable) {
         Page<UserResponseDto> usersPage = userService.getAllUsers(pageable);
         return ResponseEntity.ok(usersPage);
     }
 
-    // UPDATE
-    @PutMapping("/{id}")
-    public ResponseEntity<UserResponseDto> updateUser(@PathVariable UUID id, @Valid @RequestBody UpdateUserRequestDto requestDto) {
-        UserResponseDto updatedUser = userService.updateUser(id, requestDto);
-        return ResponseEntity.ok(updatedUser);
+
+    @PutMapping("/{id}/data")
+    public ResponseEntity<UserDataResponseDto> updateUserData(@PathVariable UUID id, @Valid @RequestBody UpdateUserDataRequestDto requestDto) {
+        UserDataResponseDto updatedUserData = userService.updateUser(id, requestDto);
+        return ResponseEntity.ok(updatedUserData);
     }
 
-    // DELETE
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable UUID id) {
         userService.deleteUser(id);
@@ -71,4 +68,18 @@ public class UserController {
         userService.changePassword(id, requestDto);
         return ResponseEntity.ok().build();
     }
+
+    @GetMapping("/{id}/contact-info")
+    public ResponseEntity<UserContactInfoResponseDto> getUserContactInfo(@PathVariable UUID id) {
+        UserContactInfoResponseDto contactInfo = userService.getUserContactInfo(id);
+        return ResponseEntity.ok(contactInfo);
+    }
+
+    @GetMapping("/{id}/data")
+    public ResponseEntity<UserDataResponseDto> getUserData(@PathVariable UUID id) {
+        UserDataResponseDto userData = userService.getUserData(id);
+        return ResponseEntity.ok(userData);
+    }
+
+
 }

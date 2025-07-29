@@ -2,12 +2,13 @@ package com.example.user_management_api.service;
 
 import com.example.user_management_api.dto.ChangePasswordRequestDto;
 import com.example.user_management_api.dto.CreateUserRequestDto;
-import com.example.user_management_api.dto.UpdateUserRequestDto;
+import com.example.user_management_api.dto.UpdateUserDataRequestDto;
+import com.example.user_management_api.dto.UserContactInfoResponseDto;
+import com.example.user_management_api.dto.UserDataResponseDto;
 import com.example.user_management_api.dto.UserResponseDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import java.util.List;
 import java.util.UUID;
 
 /**
@@ -40,7 +41,7 @@ public interface UserService {
      * @param requestDto DTO с новыми данными.
      * @return DTO с обновленными данными пользователя.
      */
-    UserResponseDto updateUser(UUID id, UpdateUserRequestDto requestDto);
+    UserDataResponseDto  updateUser(UUID id, UpdateUserDataRequestDto requestDto);
 
     /**
      * Удаляет пользователя по его ID.
@@ -54,4 +55,19 @@ public interface UserService {
      * @param requestDto DTO с старым и новым паролями.
      */
     void changePassword(UUID id, ChangePasswordRequestDto requestDto);
+    /**
+     * Возвращает контактную информацию пользователя.
+     *
+     * @param id ID пользователя, чью контактную информацию нужно получить.
+     * @return DTO с контактными данными пользователя (телефон, email и т.п.).
+     */
+    UserContactInfoResponseDto getUserContactInfo(UUID id);
+
+    /**
+     * Возвращает детальную информацию о пользователе.
+     *
+     * @param id ID пользователя, чью детальную информацию нужно получить.
+     * @return DTO с подробной информацией о пользователе (например, адрес, фотография и т.д.).
+     */
+    UserDataResponseDto getUserData(UUID id);
 }

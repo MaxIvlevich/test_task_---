@@ -1,6 +1,6 @@
 package com.example.user_management_api.model;
-
 import com.example.user_management_api.model.enums.Role;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
@@ -12,6 +12,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -19,10 +20,15 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDate;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Getter
 @Setter
@@ -31,7 +37,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @Entity
 @Table(name = "users")
-public class User {
+public class User implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -48,30 +54,6 @@ public class User {
      */
     @Column(name = "username", unique = true)
     private String username;
-
-    /**
-     * Фамилия пользователя. Не может быть пустой.
-     */
-    @Column(name = "last_name", nullable = false)
-    private String lastName;
-
-    /**
-     * Имя пользователя. Не может быть пустым.
-     */
-    @Column(name = "first_name", nullable = false)
-    private String firstName;
-
-    /**
-     * Отчество пользователя. Может быть пустым (null).
-     */
-    @Column(name = "patronymic")
-    private String patronymic;
-
-    /**
-     * Дата рождения пользователя.
-     */
-    @Column(name = "date_of_birth", nullable = false)
-    private LocalDate dateOfBirth;
 
     /**
      * Адрес электронной почты пользователя. Должен быть уникальным и не может быть пустым.
@@ -93,8 +75,36 @@ public class User {
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false)
     private Set<Role> roles = new HashSet<>();
+    @Setter
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private UserData userData;
 
-    @Column(name = "avatar_key")
-    private String avatar;
 
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return roles.stream()
+                .map(role -> new SimpleGrantedAuthority(role.name()))
+                .collect(Collectors.toSet());
+    }
+
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
 }
