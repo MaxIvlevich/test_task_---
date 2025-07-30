@@ -45,7 +45,7 @@ public class JwtUtils {
         return getClaims(token).getSubject();
     }
 
-    public String getEmailFromToken(String token){
+    public String getEmailFromToken(String token) {
         Claims claims = Jwts.parser()
                 .verifyWith(getSignInKey())
                 .build()
@@ -64,7 +64,7 @@ public class JwtUtils {
                 .getPayload();
     }
 
-    public boolean validateJwtToken(String token){
+    public boolean validateJwtToken(String token) {
         try {
             Jwts.parser()
                     .verifyWith(getSignInKey())
@@ -73,15 +73,15 @@ public class JwtUtils {
                     .getPayload();
             return true;
         } catch (ExpiredJwtException expiredJwtException) {
-            log.error("ExpiredJwtException",expiredJwtException);
-        } catch (UnsupportedJwtException exception){
-            log.error("UnsupportedJwtException",exception);
-        } catch (MalformedJwtException exception){
-            log.error("MalformedJwtException",exception);
-        } catch (SecurityException exception){
-            log.error("SecurityException",exception);
-        } catch (Exception exception){
-            log.error("Invalid token",exception);
+            log.error("ExpiredJwtException", expiredJwtException);
+        } catch (UnsupportedJwtException exception) {
+            log.error("UnsupportedJwtException", exception);
+        } catch (MalformedJwtException exception) {
+            log.error("MalformedJwtException", exception);
+        } catch (SecurityException exception) {
+            log.error("SecurityException", exception);
+        } catch (Exception exception) {
+            log.error("Invalid token", exception);
         }
         return false;
     }

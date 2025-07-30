@@ -1,8 +1,6 @@
 package com.example.user_management_api.controller;
 
 import com.example.user_management_api.service.AvatarService;
-import com.example.user_management_api.service.FileStorageService;
-import com.example.user_management_api.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,5 +31,4 @@ public class AvatarController {
         avatarService.deleteAvatar(userId);
         return ResponseEntity.noContent().build();
     }
-
 }

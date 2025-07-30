@@ -9,9 +9,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.UUID;
+
 @Service
 @RequiredArgsConstructor
-public class AvatarServiceImpl  implements AvatarService {
+public class AvatarServiceImpl implements AvatarService {
     private final UserService userService;
     private final FileStorageService fileStorageService;
 
