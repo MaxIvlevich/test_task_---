@@ -10,6 +10,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
@@ -21,7 +22,14 @@ import java.util.stream.Collectors;
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-    // Обработчик для ошибок валидации DTO (@Valid)
+    /**
+     * Обрабатывает {@link MethodArgumentNotValidException}, возникающее при
+     * провале валидации DTO, помеченного аннотацией {@code @Valid}.
+     *
+     * @param ex      исключение, содержащее детали ошибок валидации полей.
+     * @param request объект запроса.
+     * @return {@link ResponseEntity} со статусом 400 (Bad Request) и списком ошибок.
+     */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponseDto> handleValidationExceptions(MethodArgumentNotValidException ex, HttpServletRequest request) {
         String errors = ex.getBindingResult().getFieldErrors().stream()
@@ -37,7 +45,14 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
-    // Обработчик для  UserNotFoundException
+    /**
+     * Обрабатывает кастомное исключение {@link UserNotFoundException},
+     * когда запрашиваемый пользователь не найден в базе данных.
+     *
+     * @param ex      перехваченное исключение {@code UserNotFoundException}.
+     * @param request объект запроса.
+     * @return {@link ResponseEntity} со статусом 404 (Not Found).
+     */
     @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<ErrorResponseDto> handleUserNotFoundException(UserNotFoundException ex, HttpServletRequest request) {
         ErrorResponseDto errorResponse = new ErrorResponseDto(
@@ -49,7 +64,14 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
     }
 
-    // Обработчик для неверного старого пароля
+    /**
+     * Обрабатывает {@link BadCredentialsException} при неверном логине/пароле
+     * или при некорректном старом пароле во время его смены.
+     *
+     * @param ex      перехваченное исключение {@code BadCredentialsException}.
+     * @param request объект запроса.
+     * @return {@link ResponseEntity} со статусом 400 (Bad Request).
+     */
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<ErrorResponseDto> handleBadCredentialsException(BadCredentialsException ex, HttpServletRequest request) {
         ErrorResponseDto errorResponse = new ErrorResponseDto(
@@ -61,7 +83,14 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
-    // Обработчик для ошибок с refresh-токеном
+    /**
+     * Обрабатывает {@link TokenRefreshException} при ошибках с refresh-токеном
+     * (например, если он истек или не найден).
+     *
+     * @param ex      перехваченное исключение {@code TokenRefreshException}.
+     * @param request объект запроса.
+     * @return {@link ResponseEntity} со статусом 403 (Forbidden).
+     */
     @ExceptionHandler(TokenRefreshException.class)
     public ResponseEntity<ErrorResponseDto> handleTokenRefreshException(TokenRefreshException ex, HttpServletRequest request) {
         ErrorResponseDto errorResponse = new ErrorResponseDto(
@@ -73,7 +102,14 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.FORBIDDEN);
     }
 
-    // Общий обработчик для всех остальных непредвиденных ошибок
+    /**
+     * Обрабатывает все непредвиденные исключения как последняя линия защиты.
+     * Гарантирует возврат стандартизированного JSON-ответа со статусом 500.
+     *
+     * @param ex      перехваченное исключение.
+     * @param request объект запроса.
+     * @return {@link ResponseEntity} со статусом 500 (Internal Server Error).
+     */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponseDto> handleAllExceptions(Exception ex, HttpServletRequest request) {
         log.error("An unexpected error occurred for request: {}", request.getRequestURI(), ex);
@@ -122,7 +158,17 @@ public class GlobalExceptionHandler {
         );
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
-
+    /**
+     * Обрабатывает исключение {@link HttpMessageNotReadableException}.
+     * <p>
+     * Это исключение возникает, когда тело HTTP-запроса не может быть прочитано или
+     * преобразовано в ожидаемый объект. Наиболее частые причины:
+     *
+     * @param ex      перехваченное исключение {@code HttpMessageNotReadableException}.
+     * @param request объект запроса, содержащий информацию о запросе, который вызвал ошибку.
+     * @return {@link ResponseEntity} со статусом 400 (Bad Request) и телом,
+     *         сообщающим о неверном формате запроса.
+     */
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ErrorResponseDto> handleHttpMessageNotReadable(HttpMessageNotReadableException ex, HttpServletRequest request) {
         log.warn("Failed to read HTTP message for request to {}: {}", request.getRequestURI(), ex.getMessage());
@@ -134,7 +180,15 @@ public class GlobalExceptionHandler {
         );
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
-
+    /**
+     * Обрабатывает исключение {@link HttpRequestMethodNotSupportedException}.
+     * <p>
+     *
+     * @param ex      перехваченное исключение {@code HttpRequestMethodNotSupportedException}.
+     * @param request объект запроса, содержащий информацию о запросе, который вызвал ошибку.
+     * @return {@link ResponseEntity} со статусом 405 (Method Not Allowed) и телом,
+     *         информирующим клиента о недопустимом методе запроса.
+     */
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     public ResponseEntity<ErrorResponseDto> handleHttpRequestMethodNotSupported(HttpRequestMethodNotSupportedException ex, HttpServletRequest request) {
         log.warn("HTTP method not supported for request to {}: {}", request.getRequestURI(), ex.getMessage());
@@ -146,13 +200,21 @@ public class GlobalExceptionHandler {
         );
         return new ResponseEntity<>(errorResponse, HttpStatus.METHOD_NOT_ALLOWED);
     }
-
+    /**
+     * Обрабатывает исключение {@link IllegalArgumentException}.
+     * <p>
+     *
+     * @param ex      перехваченное исключение {@code IllegalArgumentException}.
+     * @param request объект запроса, содержащий информацию о запросе, который вызвал ошибку.
+     * @return {@link ResponseEntity} со статусом 400 (Bad Request) и телом,
+     *         содержащим детализированную информацию об ошибке.
+     */
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ErrorResponseDto> handleIllegalArgumentException(IllegalArgumentException ex, HttpServletRequest request) {
         log.warn("Illegal argument for request to {}: {}", request.getRequestURI(), ex.getMessage());
         ErrorResponseDto errorResponse = new ErrorResponseDto(
                 HttpStatus.BAD_REQUEST.value(),
-                ex.getMessage(), // Сообщение из исключения часто бывает полезным
+                ex.getMessage(),
                 request.getRequestURI(),
                 LocalDateTime.now()
         );
@@ -176,4 +238,32 @@ public class GlobalExceptionHandler {
         );
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
+
+    /**
+     * Обрабатывает исключение {@link MissingServletRequestParameterException}.
+     * <p>
+     * Это исключение возникает, когда в запросе отсутствует обязательный параметр.
+     * В нашем случае, это наиболее вероятно при попытке загрузить аватар без предоставления
+     * файла в поле с именем "file".
+     *
+     * @param ex      перехваченное исключение {@code MissingServletRequestParameterException}.
+     * @param request объект запроса, содержащий информацию о запросе, который вызвал ошибку.
+     * @return {@link ResponseEntity} со статусом 400 (Bad Request) и телом,
+     *         информирующим клиента о недостающем параметре.
+     */
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<ErrorResponseDto> handleMissingServletRequestParameter(MissingServletRequestParameterException ex, HttpServletRequest request) {
+        log.warn("Missing request parameter for request to {}: {}", request.getRequestURI(), ex.getMessage());
+
+        String message = String.format("Required parameter '%s' is not present.", ex.getParameterName());
+
+        ErrorResponseDto errorResponse = new ErrorResponseDto(
+                HttpStatus.BAD_REQUEST.value(),
+                message,
+                request.getRequestURI(),
+                LocalDateTime.now()
+        );
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
+
 }

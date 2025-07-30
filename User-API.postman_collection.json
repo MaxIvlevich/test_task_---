@@ -1,0 +1,438 @@
+{
+	"info": {
+		"_postman_id": "c78acb2b-d259-43a6-add6-5e95ae96cb4c",
+		"name": "User API v2",
+		"description": "# 🚀 Get started here\n\nThis template guides you through CRUD operations (GET, POST, PUT, DELETE), variables, and tests.\n\n## 🔖 **How to use this template**\n\n#### **Step 1: Send requests**\n\nRESTful APIs allow you to perform CRUD operations using the POST, GET, PUT, and DELETE HTTP methods.\n\nThis collection contains each of these [request](https://learning.postman.com/docs/sending-requests/requests/) types. Open each request and click \"Send\" to see what happens.\n\n#### **Step 2: View responses**\n\nObserve the response tab for status code (200 OK), response time, and size.\n\n#### **Step 3: Send new Body data**\n\nUpdate or add new data in \"Body\" in the POST request. Typically, Body data is also used in PUT request.\n\n```\n{\n    \"name\": \"Add your name in the body\"\n}\n\n ```\n\n#### **Step 4: Update the variable**\n\nVariables enable you to store and reuse values in Postman. We have created a [variable](https://learning.postman.com/docs/sending-requests/variables/) called `base_url` with the sample request [https://postman-api-learner.glitch.me](https://postman-api-learner.glitch.me). Replace it with your API endpoint to customize this collection.\n\n#### **Step 5: Add tests in the \"Scripts\" tab**\n\nAdding tests to your requests can help you confirm that your API is working as expected. You can write test scripts in JavaScript and view the output in the \"Test Results\" tab.\n\n<img src=\"https://content.pstmn.io/fa30ea0a-373d-4545-a668-e7b283cca343/aW1hZ2UucG5n\" alt=\"\" height=\"1530\" width=\"2162\">\n\n## 💪 Pro tips\n\n- Use folders to group related requests and organize the collection.\n    \n- Add more [scripts](https://learning.postman.com/docs/writing-scripts/intro-to-scripts/) to verify if the API works as expected and execute workflows.\n    \n\n## 💡Related templates\n\n[API testing basics](https://go.postman.co/redirect/workspace?type=personal&collectionTemplateId=e9a37a28-055b-49cd-8c7e-97494a21eb54&sourceTemplateId=ddb19591-3097-41cf-82af-c84273e56719)  \n[API documentation](https://go.postman.co/redirect/workspace?type=personal&collectionTemplateId=e9c28f47-1253-44af-a2f3-20dce4da1f18&sourceTemplateId=ddb19591-3097-41cf-82af-c84273e56719)  \n[Authorization methods](https://go.postman.co/redirect/workspace?type=personal&collectionTemplateId=31a9a6ed-4cdf-4ced-984c-d12c9aec1c27&sourceTemplateId=ddb19591-3097-41cf-82af-c84273e56719)",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "36453874",
+		"_collection_link": "https://maxiv3.postman.co/workspace/Lab-2-user~e23663e1-3cb1-4399-96b8-416fed7b33bf/collection/36453874-c78acb2b-d259-43a6-add6-5e95ae96cb4c?action=share&source=collection_link&creator=36453874"
+	},
+	"item": [
+		{
+			"name": "login admin",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var jsonData = pm.response.json();",
+							"",
+							"if (jsonData && jsonData.accessToken) {",
+							"    pm.collectionVariables.set(\"accessToken\", jsonData.accessToken);",
+							"    console.log(\"Access Token сохранен в переменные коллекции.\");",
+							"}",
+							"",
+							"if (jsonData && jsonData.refreshToken) {",
+							"    pm.collectionVariables.set(\"refreshToken\", jsonData.refreshToken);",
+							"    console.log(\"Refresh Token сохранен в переменные коллекции.\");",
+							"}",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"identifier\": \"admin\",\n    \"password\": \"admin\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/auth/signin",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"auth",
+						"signin"
+					]
+				},
+				"description": "This is a POST request, submitting data to an API via the request body. This request submits JSON data, and the data is reflected in the response.\n\nA successful POST request typically returns a `200 OK` or `201 Created` response code."
+			},
+			"response": []
+		},
+		{
+			"name": "Get All Users",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseurl}}/users?page=0&size=5",
+					"host": [
+						"{{baseurl}}"
+					],
+					"path": [
+						"users"
+					],
+					"query": [
+						{
+							"key": "page",
+							"value": "0"
+						},
+						{
+							"key": "size",
+							"value": "5"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "POST Create Test User",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"if (pm.response.code === 201) {\r",
+							"    console.log(\"Пользователь успешно создан (статус 201). Сохраняем переменные...\");\r",
+							"\r",
+							"    var jsonData = pm.response.json();\r",
+							"\r",
+							"    if (jsonData && jsonData.id) {\r",
+							"        pm.collectionVariables.set(\"testUserId\", jsonData.id);\r",
+							"        console.log(\"ID тестового пользователя сохранен: \" + jsonData.id);\r",
+							"    } else {\r",
+							"        console.error(\"ОШИБКА: Статус 201, но поле 'id' не найдено в ответе!\");\r",
+							"    }\r",
+							"\r",
+							"    if (jsonData && jsonData.username) {\r",
+							"        pm.collectionVariables.set(\"testUserIdentifier\", jsonData.username);\r",
+							"        console.log(\"Логин тестового пользователя сохранен: \" + jsonData.username);\r",
+							"    } else {\r",
+							"        console.error(\"ОШИБКА: Статус 201, но поле 'username' не найдено в ответе!\");\r",
+							"    }\r",
+							"\r",
+							"    pm.collectionVariables.set(\"testUserPassword\", \"password123\");\r",
+							"    console.log(\"Пароль для тестового пользователя установлен.\");\r",
+							"\r",
+							"} else if (pm.response.code === 409) {\r",
+							"    \r",
+							"    console.warn(\"Пользователь уже существует (статус 409). Переменные не были изменены.\");\r",
+							"    \r",
+							"} else {\r",
+							"    console.error(\"Произошла непредвиденная ошибка. Статус ответа: \" + pm.response.code);\r",
+							"    console.error(\"Тело ответа: \" + pm.response.text());\r",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"username\": \"avatar_tester\",\r\n    \"lastName\": \"Test\",\r\n    \"firstName\": \"Avatar\",\r\n    \"dateOfBirth\": \"2000-01-01\",\r\n    \"email\": \"avatar_tester@example.com\",\r\n    \"phoneNumber\": \"+9876543210\",\r\n    \"password\": \"password123\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseurl}}/users",
+					"host": [
+						"{{baseurl}}"
+					],
+					"path": [
+						"users"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "[AUTH] Sign In as Test User",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var jsonData = pm.response.json();\r",
+							"if (jsonData && jsonData.accessToken) {\r",
+							"    pm.collectionVariables.set(\"accessToken\", jsonData.accessToken);\r",
+							"    console.log(\"Access Token для тестового пользователя сохранен.\");\r",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"identifier\": \"{{testUserIdentifier}}\",\r\n    \"password\": \"{{testUserPassword}}\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/auth/signin",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"auth",
+						"signin"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "[USER] Update User Data",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200 OK\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"var jsonData = pm.response.json();\r",
+							"pm.test(\"First name was updated\", function () {\r",
+							"    pm.expect(jsonData.firstName).to.eql(\"AvatarUpdated\");\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"firstName\": \"AvatarUpdated\",\r\n    \"lastName\": \"TestUpdated\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseurl}}/users/{{testUserId}}/data",
+					"host": [
+						"{{baseurl}}"
+					],
+					"path": [
+						"users",
+						"{{testUserId}}",
+						"data"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "[USER] Change Password",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200 OK\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"// Сохраняем новый пароль\r",
+							"pm.collectionVariables.set(\"testUserPassword\", \"newSecurePassword456\");"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"oldPassword\": \"{{testUserPassword}}\",\r\n    \"newPassword\": \"newSecurePassword456\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseurl}}/users/{{testUserId}}/password",
+					"host": [
+						"{{baseurl}}"
+					],
+					"path": [
+						"users",
+						"{{testUserId}}",
+						"password"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "[AVATAR] Upload",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "file",
+							"type": "file",
+							"src": "/C:/Users/jylve/Pictures/Saved Pictures/bXpKTKWZ4ds.jpg"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{baseurl}}/users/{{testUserId}}/avatar",
+					"host": [
+						"{{baseurl}}"
+					],
+					"path": [
+						"users",
+						"{{testUserId}}",
+						"avatar"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "[AVATAR] Delete",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{baseurl}}/users/{{testUserId}}/avatar",
+					"host": [
+						"{{baseurl}}"
+					],
+					"path": [
+						"users",
+						"{{testUserId}}",
+						"avatar"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "[USER] Delete Test User",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 204 No Content\", function () {\r",
+							"    pm.response.to.have.status(204);\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{baseurl}}/users/{{testUserId}}",
+					"host": [
+						"{{baseurl}}"
+					],
+					"path": [
+						"users",
+						"{{testUserId}}"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{accessToken}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseurl",
+			"value": "http://localhost:8080/api/v1"
+		},
+		{
+			"key": "id",
+			"value": "1",
+			"disabled": true
+		},
+		{
+			"key": "accessToken",
+			"value": ""
+		},
+		{
+			"key": "refreshToken",
+			"value": ""
+		},
+		{
+			"key": "testUserId",
+			"value": ""
+		},
+		{
+			"key": "testUserIdentifier",
+			"value": ""
+		},
+		{
+			"key": "testUserPassword",
+			"value": ""
+		}
+	]
+}
