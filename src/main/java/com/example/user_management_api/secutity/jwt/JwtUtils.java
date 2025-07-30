@@ -1,4 +1,4 @@
-package com.example.user_management_api.secutity;
+package com.example.user_management_api.secutity.jwt;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -9,10 +9,11 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
-import java.time.Instant;
 import java.util.Date;
 
 @Slf4j
@@ -23,14 +24,13 @@ public class JwtUtils {
     @Value("${app.jwt.expirationMs}")
     private Long accessTokenDurationMs;
 
-    public String generateJwtToken(String email) {
-        Instant now = Instant.now();
-        Instant expiryDate = now.plusMillis(accessTokenDurationMs);
+    public String generateJwtToken(Authentication authentication) {
+        UserDetails userPrincipal = (UserDetails) authentication.getPrincipal();
 
         return Jwts.builder()
-                .subject(email)
-                .issuedAt(Date.from(now))
-                .expiration(Date.from(expiryDate))
+                .subject(userPrincipal.getUsername())
+                .issuedAt(new Date())
+                .expiration(new Date((new Date()).getTime() + accessTokenDurationMs))
                 .signWith(getSignInKey())
                 .compact();
     }
@@ -39,6 +39,10 @@ public class JwtUtils {
     private SecretKey getSignInKey() {
         byte[] keyBytes = Decoders.BASE64.decode(jwtSecretString);
         return Keys.hmacShaKeyFor(keyBytes);
+    }
+
+    public String getUsernameFromJwtToken(String token) {
+        return getClaims(token).getSubject();
     }
 
     public String getEmailFromToken(String token){
@@ -50,6 +54,14 @@ public class JwtUtils {
 
         return claims.getSubject();
 
+    }
+
+    private Claims getClaims(String token) {
+        return Jwts.parser()
+                .verifyWith(getSignInKey())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
     }
 
     public boolean validateJwtToken(String token){
