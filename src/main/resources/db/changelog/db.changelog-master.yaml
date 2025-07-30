@@ -1,0 +1,22 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: mivlev
+      changes:
+        - sqlFile:
+            path: changes/V001_create-users-table.sql
+            relativeToChangelogFile: true
+  - changeSet:
+      id: 2
+      author: mivlev
+      changes:
+        - sqlFile:
+            path: changes/V002_create_user_data_schema.sql
+            relativeToChangelogFile: true
+  - changeSet:
+      id: 3
+      author: mivlev
+      changes:
+        - sqlFile:
+            path: changes/V003_create_refresh_tokens_table.sql
+            relativeToChangelogFile: true
