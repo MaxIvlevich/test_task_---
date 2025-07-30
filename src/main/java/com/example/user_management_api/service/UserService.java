@@ -70,4 +70,18 @@ public interface UserService {
      * @return DTO с подробной информацией о пользователе (например, адрес, фотография и т.д.).
      */
     UserDataResponseDto getUserData(UUID id);
+
+    /**
+     * Устанавливает или обновляет ключ аватара для пользователя.
+     * @param userId ID пользователя.
+     * @param avatarKey ключ файла в хранилище.
+     */
+    void setAvatar(UUID userId, String avatarKey);
+
+    /**
+     * Удаляет ключ аватара у пользователя.
+     * @param userId ID пользователя.
+     * @return ключ удаленного аватара, если он был, или null.
+     */
+    String removeAvatar(UUID userId);
 }

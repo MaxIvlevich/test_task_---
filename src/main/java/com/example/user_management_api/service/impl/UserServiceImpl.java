@@ -107,4 +107,31 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new UserNotFoundException("User not found with id: " + id));
         return userMapper.toUserDataDto(user.getUserData());
     }
+
+    @Override
+    @Transactional
+    public void setAvatar(UUID userId, String avatarKey) {
+        UserData userData = findUserDataByUserId(userId);
+        userData.setAvatarKey(avatarKey);
+
+    }
+
+    @Override
+    @Transactional
+    public String removeAvatar(UUID userId) {
+        UserData userData = findUserDataByUserId(userId);
+        String oldAvatarKey = userData.getAvatarKey();
+        userData.setAvatarKey(null);
+        return oldAvatarKey;
+    }
+
+    private UserData findUserDataByUserId(UUID userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("User not found with id: " + userId));
+        UserData userData = user.getUserData();
+        if (userData == null) {
+            throw new IllegalStateException("User data not found for user with id: " + userId);
+        }
+        return userData;
+    }
 }
