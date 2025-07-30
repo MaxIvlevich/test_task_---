@@ -11,6 +11,7 @@ import com.example.user_management_api.mapper.UserMapper;
 import com.example.user_management_api.model.User;
 import com.example.user_management_api.model.UserData;
 import com.example.user_management_api.model.enums.Role;
+import com.example.user_management_api.repository.RefreshTokenRepository;
 import com.example.user_management_api.repository.UserRepository;
 import com.example.user_management_api.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +31,7 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
+    private final RefreshTokenRepository refreshTokenRepository;
 
     @Override
     @Transactional
@@ -75,10 +77,12 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void deleteUser(UUID id) {
-        if (!userRepository.existsById(id)) {
-            throw new UserNotFoundException("User not found with id: " + id);
-        }
-        userRepository.deleteById(id);
+        User userToDelete = userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException("User not found with id: " + id));
+        // 2. Явно удаляем все связанные RefreshToken'ы.
+        refreshTokenRepository.deleteByUser(userToDelete);
+        // 3. Теперь удаляем самого пользователя.
+        userRepository.delete(userToDelete);
     }
 
     @Override
