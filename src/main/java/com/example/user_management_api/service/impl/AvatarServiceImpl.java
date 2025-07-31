@@ -20,7 +20,7 @@ public class AvatarServiceImpl implements AvatarService {
     @Transactional
     public void uploadAvatar(UUID userId, MultipartFile file) {
 
-        deleteAvatarInternal(userId);
+        deleteAvatar(userId);
         String newAvatarKey = fileStorageService.uploadFile(file);
         try {
             userService.setAvatar(userId, newAvatarKey);
@@ -33,13 +33,6 @@ public class AvatarServiceImpl implements AvatarService {
     @Override
     @Transactional
     public void deleteAvatar(UUID userId) {
-        deleteAvatarInternal(userId);
-    }
-
-    /**
-     * Внутренний метод для удаления аватара, который можно переиспользовать.
-     */
-    private void deleteAvatarInternal(UUID userId) {
         String oldAvatarKey = userService.removeAvatar(userId);
         if (oldAvatarKey != null) {
             fileStorageService.deleteFile(oldAvatarKey);
