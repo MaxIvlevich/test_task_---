@@ -6,7 +6,7 @@ import com.example.user_management_api.dto.UpdateUserDataRequestDto;
 import com.example.user_management_api.dto.UserContactInfoResponseDto;
 import com.example.user_management_api.dto.UserDataResponseDto;
 import com.example.user_management_api.dto.UserResponseDto;
-import com.example.user_management_api.service.UserService;
+import com.example.user_management_api.service.impl.UserServiceImpl;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -29,7 +29,7 @@ import java.util.UUID;
 @RequestMapping("/api/v1/users")
 @RequiredArgsConstructor
 public class UserController {
-    private final UserService userService;
+    private final UserServiceImpl userService;
 
     @PostMapping
     public ResponseEntity<UserResponseDto> createUser(@Valid @RequestBody CreateUserRequestDto requestDto) {
