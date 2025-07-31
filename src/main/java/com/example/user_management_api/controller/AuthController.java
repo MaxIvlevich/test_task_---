@@ -8,7 +8,7 @@ import com.example.user_management_api.exception.TokenRefreshException;
 import com.example.user_management_api.model.RefreshToken;
 import com.example.user_management_api.model.User;
 import com.example.user_management_api.secutity.jwt.JwtUtils;
-import com.example.user_management_api.service.impl.RefreshTokenServiceImpl;
+import com.example.user_management_api.service.RefreshTokenService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
 public class AuthController {
     private final AuthenticationManager authenticationManager;
     private final JwtUtils jwtUtils;
-    private final RefreshTokenServiceImpl refreshTokenService;
+    private final RefreshTokenService refreshTokenService;
 
     @PostMapping("/signin")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {

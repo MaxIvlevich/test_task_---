@@ -1,6 +1,6 @@
 package com.example.user_management_api.controller;
 
-import com.example.user_management_api.service.impl.AvatarServiceImpl;
+import com.example.user_management_api.service.AvatarService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +18,7 @@ import java.util.UUID;
 @RequestMapping("/api/v1/users/{userId}/avatar")
 @RequiredArgsConstructor
 public class AvatarController {
-    private final AvatarServiceImpl avatarService;
+    private final AvatarService avatarService;
 
     @PostMapping
     public ResponseEntity<Void> uploadAvatar(@PathVariable UUID userId, @RequestParam("file") MultipartFile file) {
